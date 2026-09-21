@@ -6,8 +6,48 @@ from constants import (
     MU_EARTH,
     G0,
     THRUST,
-    SPECIFIC_IMPULSE
+    SPECIFIC_IMPULSE,
+    SPACECRAFT_MASS
 )
+
+
+def gravitational_acceleration(position):
+    """Two-body gravitational acceleration [m/s^2]."""
+    r = np.linalg.norm(position)
+
+    return -MU_EARTH * position / r**3
+
+
+def thrust_acceleration(thrust_direction):
+    """Constant thrust acceleration [m/s^2]."""
+    return (THRUST / SPACECRAFT_MASS) * thrust_direction
+
+
+def acceleration(position, thrust_direction):
+    """Total spacecraft acceleration [m/s^2]."""
+    return (
+        gravitational_acceleration(position)
+        + thrust_acceleration(thrust_direction)
+    )
+
+
+def equations_of_motion(state, thrust_direction):
+    """
+    Calculate state derivative.
+
+    State:
+        [x, y, z, vx, vy, vz]
+
+    Position: m
+    Velocity: m/s
+    """
+    position = state[:3]
+
+    velocity = state[3:]
+
+    a = acceleration(position, thrust_direction)
+
+    return np.concatenate((velocity, a))
 
 
 def calculate_exhaust_velocity():
